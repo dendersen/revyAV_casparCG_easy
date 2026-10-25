@@ -1,0 +1,55 @@
+#! /bin/bash
+
+GIT_LINK="https://github.com/CasparCG/server.git"
+SRC_DIR="server_src"
+BUILD_TOOL="tools/linux/build-in-docker"
+EXTRACT_TOOL="tools/linux/extract-from-docker"
+TARGET_BUILD_DIR="casparcg_server"
+FINISH_DIR="server"
+
+git clone "$GIT_LINK" "$SRC_DIR"
+cd "$SRC_DIR"
+
+if ! sudo apt update; then
+  echo "Failed to update package list"
+  exit 1
+fi
+
+if ! sudo "$BUILD_TOOL"; then
+  echo "Failed to build in docker"
+  exit 1
+fi
+
+if ! sudo "$EXTRACT_TOOL"; then
+  echo "Failed to extract from docker"
+  exit 1
+fi
+
+if ! sudo apt upgrade -y; then
+  echo "Failed to upgrade packages"
+  exit 1
+fi
+
+if [ ! -d "$BUILD_TARGET_DIR" ]; then
+  echo "build did not produce expected $BUILD_TARGET_DIR directory"
+  echo "target directory may have changed name, if so update the script accordingly"
+  exit 1
+fi
+
+if [ -d "../$FINISH_DIR" ]; then
+  echo "$FINISH_DIR directory already exists"
+  echo "do you wish to delete it first? (y/n)"
+  read -r response
+  if [ "$response" = "y" ]; then
+    rm -rf ../"$FINISH_DIR"
+  else
+    sudo chown -r $USER:$USER "$FINISH_DIR"/
+    echo "Aborting"
+    exit 1
+  fi
+fi
+
+sudo chown -R $USER:$USER "$TARGET_BUILD_DIR"/
+mv "$TARGET_BUILD_DIR"/ ../"$FINISH_DIR"
+echo "Server installation complete"
+cd ..

@@ -1,0 +1,100 @@
+#! /bin/bash
+
+GIT_LINK="https://github.com/CasparCG/media-scanner.git"
+SRC_DIR="media-scanner_src"
+YARN_VERSION="4"
+BUILD_TARGET_DIR="deploy"
+FINISH_DIR="scanner"
+DEBIAN_YARN_SOURCE_LINK="https://deb.nodesource.com/setup_24.x"
+
+if [ ! -d "$SRC_DIR" ]; then
+  git clone "$GIT_LINK" "$SRC_DIR"
+fi
+
+cd "$SRC_DIR"
+
+yarnpkgInstallSecond() {
+  curl -fsSL "$DEBIAN_YARN_SOURCE_LINK" | sudo -E bash -
+  sudo apt-get install -y nodejs
+  sudo npm install -g corepack
+  sudo corepack enable
+}
+
+if ! sudo apt update; then
+  echo "Failed to update package list"
+  exit 1
+fi
+
+YARN_GOOD=0
+if ! command -v yarnpkg >/dev/null 2>&1; then
+  echo "Yarnpkg is not installed"
+else
+  if yarnpkg --version | grep -q "^[${YARN_VERSION}]"; then
+    echo "Yarnpkg version $YARN_VERSION is installed"
+    YARN_GOOD=1
+  else
+    echo "Yarnpkg too old"
+    exit 1
+  fi
+fi
+
+if [ "$YARN_GOOD" -eq 0 ]; then
+  echo "Attempting to install Yarnpkg"
+  if ! apt-cache madison yarnpkg | grep -q "yarnpkg | $YARN_VERSION"; then
+    echo "apt yarnpkg not version $YARN_VERSION"
+    echo "Installing Yarnpkg version $YARN_VERSION using alternative method"
+    yarnpkgInstallSecond
+    if yarnpkg --version | grep -q "^[${YARN_VERSION}]"; then
+      echo "Yarnpkg version $YARN_VERSION is installed"
+      YARN_GOOD=1
+    fi
+  fi
+else
+  echo "Yarnpkg version $YARN_VERSION is already installed"
+  echo "Skipping installation" 
+fi
+
+if [ "$YARN_GOOD" -eq 0 ]; then
+  echo "installing Yarnpkg using apt"
+  if ! sudo apt install -y yarnpkg; then
+    echo "Failed to install yarnpkg using apt"
+    exit 1
+  fi
+else
+  echo "Yarnpkg version $YARN_VERSION is installed"
+  echo "not attempting yarnpkg with apt"
+fi
+
+if ! sudo apt upgrade -y; then
+  echo "Failed to upgrade packages"
+  exit 1
+fi
+
+echo "Installing build dependencies"
+yarnpkg install
+echo "starting development server"
+yarnpkg dev &
+echo "building the project"
+yarnpkg build
+echo "build complete, ignore missing './src/index.ts' it is expected"
+
+if [ ! -d "$BUILD_TARGET_DIR" ]; then
+  echo "build did not produce expected $BUILD_TARGET_DIR directory"
+  echo "target directory may have changed name, if so update the script accordingly"
+  exit 1
+fi
+
+if [ -d "../$FINISH_DIR" ]; then
+  echo "$FINISH_DIR directory already exists"
+  echo "do you wish to delete it first? (y/n)"
+  read -r response
+  if [ "$response" = "y" ]; then
+    rm -rf ../"$FINISH_DIR"
+  else
+    echo "Aborting"
+    exit 1
+  fi
+fi
+
+mv "$BUILD_TARGET_DIR"/ ../"$FINISH_DIR"
+cd ..

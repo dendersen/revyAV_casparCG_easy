@@ -1,0 +1,18 @@
+#! /bin/bash
+if [ ! -x "./helper" ]; then
+  echo "helper script not found or not executable"
+  exit 1
+fi
+
+if ./helper \
+--run_in_new_terminal \
+--start_server \
+--start_client \
+--start_scanner
+
+then
+  echo "All processes started successfully"
+else
+  echo "some commands failed"
+  exit 1
+fi

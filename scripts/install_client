@@ -1,0 +1,57 @@
+#! /bin/bash
+
+GIT_LINK="https://github.com/CasparCG/client.git"
+SRC_DIR="client_src"
+BUILD_TARGET_DIR="build"
+FINISH_DIR="client"
+BUILD_TOOL="tools/build-linux.sh"
+
+git clone --recurse-submodules "$GIT_LINK" "$SRC_DIR"
+cd "$SRC_DIR"
+
+if sudo apt update; then
+  echo "Failed to update package list"
+  exit 1
+fi
+
+if sudo apt install -y libvlc-dev libboost-all-dev libxkbcommon-dev  libvlccore-dev time; then
+  echo "Failed to install lib*-dev dependencies"
+  exit 1
+fi
+
+if sudo apt install -y qt6-base-dev qt6-multimedia-dev qt6-base-dev-tools qt6-tools-dev qt6-websockets-dev qt6-svg-dev qt6-tools-dev-tools qt6-5compat-dev; then
+  echo "Failed to install qt6-*-dev dependencies"
+  exit 1
+fi
+
+if sudo apt upgrade -y; then
+  echo "Failed to upgrade packages"
+  exit 1
+fi
+
+if ! "$BUILD_TOOL"; then
+  echo "Failed to build client"
+  exit 1
+fi
+
+if [ ! -d "$BUILD_TARGET_DIR" ]; then
+  echo "build did not produce expected $BUILD_TARGET_DIR directory"
+  echo "target directory may have changed name, if so update the script accordingly"
+  exit 1
+fi
+
+if [ -d "../$FINISH_DIR" ]; then
+  echo "$FINISH_DIR directory already exists"
+  echo "do you wish to delete it first? (y/n)"
+  read -r response
+  if [ "$response" = "y" ]; then
+    rm -rf ../"$FINISH_DIR"
+  else
+    echo "Aborting"
+    exit 1
+  fi
+fi
+
+
+mv "$BUILD_TARGET_DIR"/ ../"$FINISH_DIR"
+cd ..
