@@ -1,0 +1,42 @@
+#! /bin/bash
+
+sudo apt install cmake build-essential git pkg-config
+mkdir ~/casparCG
+
+GetTerminalApp() {
+  if [ apt list  ]; then
+    echo "$TERM_PROGRAM"
+  fi
+}
+
+installServer() {
+  . ./scripts/server_install
+}
+
+installClient() {
+  . ./scripts/client_install
+}
+
+installScanner() {
+  . ./scripts/scanner_install
+}
+
+cleanup() {
+  . ./scripts/cleanup
+}
+
+setup() {
+  . ./scripts/setup
+}
+
+startServer() {
+  . ./scripts/server_start
+}
+
+startClient() {
+  . ./scripts/client_start
+}
+
+startScanner() {
+  . ./scripts/scanner_start
+}
