@@ -1,4 +1,4 @@
-#! bin/bash
+#! /bin/bash
 mv server/casparcg.config .
 ln -sf casparcg.config server/casparcg.config
 ln -sf casparcg.config scanner/casparcg.config

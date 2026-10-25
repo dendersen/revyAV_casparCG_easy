@@ -3,9 +3,17 @@
 sudo apt install cmake build-essential git pkg-config
 mkdir ~/casparCG
 
-GetTerminalApp() {
-  if [ apt list  ]; then
-    echo "$TERM_PROGRAM"
+CheckTerminalApp() {
+  if [ "$(apt list "$TERMINAL_TARGET" 2>/dev/null | grep -i "$TERMINAL_TARGET/stable")" == "" ]; then
+    echo "$TERMINAL_TARGET is not installed"
+    echo "should $TERMINAL_TARGET be installed automatically? (y/n)"
+    read -r INSTALL_TERMINAL
+    if [ "$INSTALL_TERMINAL" == "y" ]; then
+      sudo apt install "$TERMINAL_TARGET"
+    else
+      echo "$TERMINAL_TARGET will not be installed"
+      exit 1
+    fi
   fi
 }
 
@@ -40,3 +48,50 @@ startClient() {
 startScanner() {
   . ./scripts/scanner_start
 }
+
+RUN_IN_NEW_TERMINAL=0
+TERMINAL_TARGET=konsole
+
+while [ "$#" -gt 0 ]
+do
+  case "$1" in
+    --start_server)
+      if [ "$RUN_IN_NEW_TERMINAL" -eq 0 ]; then
+        startServer
+      else
+        $TERMINAL_TARGET -e bash -c "helper start_server" &
+      fi
+      ;;
+    --start_client)
+      if [ "$RUN_IN_NEW_TERMINAL" -eq 0 ]; then
+        startClient
+      else
+        $TERMINAL_TARGET -e bash -c "helper start_client" &
+      fi
+      ;;
+    --start_scanner)
+      if [ "$RUN_IN_NEW_TERMINAL" -eq 0 ]; then
+        startScanner
+      else
+        $TERMINAL_TARGET -e bash -c "helper start_scanner" &
+      fi
+      ;;
+    --set_terminal)
+      if [ "$#" -lt 2 ]; then
+        echo "--set_terminal requires a terminal name" >&2
+        exit 1
+      fi
+      echo "Setting terminal target to $2"
+      TERMINAL_TARGET="$2"
+      CheckTerminalApp
+      shift
+      ;;
+    --run_in_new_terminal)
+      RUN_IN_NEW_TERMINAL=1
+      ;;
+    --*)
+      echo "Unknown option: $1"
+      ;;
+  esac
+  shift
+done

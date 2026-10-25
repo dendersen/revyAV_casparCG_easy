@@ -1,7 +1,27 @@
 #! /bin/bash
 git clone --recurse-submodules https://github.com/CasparCG/client.git client_src
 cd client_src
-sudo apt install qt6-base-dev qt6-multimedia-dev qt6-base-dev-tools libvlc-dev libboost-all-dev qt6-tools-dev qt6-websockets-dev qt6-svg-dev qt6-tools-dev-tools libxkbcommon-dev qt6-5compat-dev libvlccore-dev time
+
+if sudo apt update; then
+  echo "Failed to update package list"
+  exit 1
+fi
+
+if sudo apt install -y libvlc-dev libboost-all-dev libxkbcommon-dev  libvlccore-dev time; then
+  echo "Failed to install lib*-dev dependencies"
+  exit 1
+fi
+
+if sudo apt install -y qt6-base-dev qt6-multimedia-dev qt6-base-dev-tools qt6-tools-dev qt6-websockets-dev qt6-svg-dev qt6-tools-dev-tools qt6-5compat-dev; then
+  echo "Failed to install qt6-*-dev dependencies"
+  exit 1
+fi
+
+if sudo apt upgrade -y; then
+  echo "Failed to upgrade packages"
+  exit 1
+fi
+
 ./tools/build-linux.sh
 mv build/ ../client
 cd ..

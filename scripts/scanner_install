@@ -1,7 +1,58 @@
 #! /bin/bash
 git clone https://github.com/CasparCG/media-scanner.git media-scanner_src
 cd media-scanner_src/
-sudo apt-get install yarnpkg
+
+yarnpkgInstallSecond() {
+  curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+  sudo apt-get install -y nodejs
+  sudo npm install -g corepack
+  sudo corepack enable
+}
+
+if sudo apt update; then
+  echo "Failed to update package list"
+  exit 1
+fi
+
+YARN_GOOD=0
+if command -v yarnpkg; then
+  echo "Yarnpkg is not installed"
+else
+  if yarnpkg --version | grep -q "^[4]"; then
+    echo "Yarnpkg version 4 is installed"
+    YARN_GOOD=1
+  else
+    echo "Yarnpkg too old"
+    exit 1
+  fi
+fi
+
+if [ "$YARN_GOOD" -eq 0 ]; then
+  if ! apt apt-cache madison yarnpkg | grep -q "yarnpkg | 4"; then
+    yarnpkgInstallSecond
+    if yarnpkg --version | grep -q "^[4]"; then
+      echo "Yarnpkg version 4 is installed"
+      YARN_GOOD=1
+    fi
+  fi
+else
+  echo "Yarnpkg version 4 is already installed"
+fi
+
+if [ "$YARN_GOOD" -eq 0 ]; then
+  if sudo apt-get install -y yarnpkg; then
+    echo "Failed to install yarnpkg on apt"
+    exit 1
+  fi
+else
+  echo "Yarnpkg version 4 is already installed"
+fi
+
+if sudo apt upgrade -y; then
+  echo "Failed to upgrade packages"
+  exit 1
+fi
+
 yarnpkg install
 yarnpkg dev &
 yarnpkg build
