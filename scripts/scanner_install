@@ -9,7 +9,7 @@ yarnpkgInstallSecond() {
   sudo corepack enable
 }
 
-if sudo apt update; then
+if ! sudo apt update; then
   echo "Failed to update package list"
   exit 1
 fi
@@ -40,7 +40,7 @@ else
 fi
 
 if [ "$YARN_GOOD" -eq 0 ]; then
-  if sudo apt-get install -y yarnpkg; then
+  if ! sudo apt install -y yarnpkg; then
     echo "Failed to install yarnpkg on apt"
     exit 1
   fi
@@ -48,7 +48,7 @@ else
   echo "Yarnpkg version 4 is already installed"
 fi
 
-if sudo apt upgrade -y; then
+if ! sudo apt upgrade -y; then
   echo "Failed to upgrade packages"
   exit 1
 fi
