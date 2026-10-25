@@ -1,5 +1,9 @@
 #! /bin/bash
-git clone https://github.com/CasparCG/media-scanner.git media-scanner_src
+
+if [ ! -d "media-scanner_src" ]; then
+  git clone https://github.com/CasparCG/media-scanner.git media-scanner_src
+fi
+
 cd media-scanner_src/
 
 yarnpkgInstallSecond() {
@@ -62,5 +66,23 @@ fi
 yarnpkg install
 yarnpkg dev &
 yarnpkg build
+
+if [ ! -d "deploy" ]; then
+  echo "Deploy directory not found"
+  exit 1
+fi
+
+if [ -d "../scanner" ]; then
+  echo "Scanner directory already exists"
+  echo "do you wish to delete it first? (y/n)"
+  read -r response
+  if [ "$response" = "y" ]; then
+    rm -rf ../scanner
+  else
+    echo "Aborting"
+    exit 1
+  fi
+fi
+
 mv deploy/ ../scanner
 cd ..
