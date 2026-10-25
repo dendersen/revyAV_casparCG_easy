@@ -1,2 +1,4 @@
 #! /bin/bash
+echo "Starting client executable..."
 ./client/Shell/casparcg-client
+echo "Client execution stopped."
