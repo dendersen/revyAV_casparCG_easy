@@ -1,0 +1,20 @@
+#! /bin/bash
+if [ "$PWD" != "$HOME/casparCG" ]; then
+  OLD_PATH="$PWD"
+  REPO=$(cat ./.git/config | grep 'url = ' | sed 's|url = ||')
+  #insure repo points to a revyAV_casparCG_easy.git
+  if [[ "$REPO" != *"revyAV_casparCG_easy.git"* ]]; then
+    echo "Error: Repository is not revyAV_casparCG_easy.git"
+    exit 1
+  fi
+  if [ "$REPO" != "" ]; then
+    git clone "$REPO" "$HOME/casparCG"
+  fi
+  cd "$HOME/casparCG"
+  #ask user for confirmation before removing old path
+  read -p "Remove old path $OLD_PATH? (y/n) " CONFIRM
+  if [[ "$CONFIRM" != "y" ]]; then
+    exit 0
+  fi
+  rm -rf "$OLD_PATH"
+fi
