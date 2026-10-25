@@ -19,8 +19,8 @@ if [ "$PWD" != "$HOME/casparCG" ]; then
   fi
   cd "$HOME/casparCG"
   #ask user for confirmation before removing old path
+  echo 
   
-  echo fixer is complete.
   echo "perform command 'cd $HOME/casparCG'"
   echo not needed if you are already there
   
