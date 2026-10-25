@@ -1,4 +1,4 @@
-#! /bin/bash
+
 if [ "$PWD" != "$HOME/casparCG" ]; then
   OLD_PATH="$PWD"
   REPO=$(cat ./.git/config | grep 'url = ' | sed 's|url = ||' | sed 's| ||' | sed 's|\t||')
@@ -19,9 +19,18 @@ if [ "$PWD" != "$HOME/casparCG" ]; then
   fi
   cd "$HOME/casparCG"
   #ask user for confirmation before removing old path
+  
+  echo fixer is complete.
+  echo "perform command 'cd $HOME/casparCG'"
+  echo not needed if you are already there
+  
+  echo 
+  
   read -p "Remove old path $OLD_PATH? (y/n) " CONFIRM
   if [[ "$CONFIRM" != "y" ]]; then
     exit 0
   fi
   rm -rf "$OLD_PATH"
+else
+  echo "Already in $HOME/casparCG"
 fi
