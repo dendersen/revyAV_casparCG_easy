@@ -1,7 +1,7 @@
 #! /bin/bash
 if [ "$PWD" != "$HOME/casparCG" ]; then
   OLD_PATH="$PWD"
-  REPO=$(cat ./.git/config | grep 'url = ' | sed 's|url = ||')
+  REPO=$(cat ./.git/config | grep 'url = ' | sed 's|url = ||' | sed 's| ||' | sed 's|\t||')
   #insure repo points to a revyAV_casparCG_easy.git
   if [[ "$REPO" != *"revyAV_casparCG_easy.git"* ]]; then
     echo "Error: Repository is not revyAV_casparCG_easy.git"
