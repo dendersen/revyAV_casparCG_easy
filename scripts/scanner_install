@@ -1,0 +1,9 @@
+#! bin/bash
+git clone https://github.com/CasparCG/media-scanner.git media-scanner_src
+cd media-scanner_src/
+sudo apt-get install yarnpkg
+yarnpkg install
+yarnpkg dev &
+yarnpkg build
+mv deploy/ ../scanner
+cd ..

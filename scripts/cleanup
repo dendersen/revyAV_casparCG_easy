@@ -1,0 +1,4 @@
+#! bin/bash
+rm -rf client_src
+rm -rf media-scanner_src
+rm -rf server_src

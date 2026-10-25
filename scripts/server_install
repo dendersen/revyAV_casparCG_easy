@@ -1,0 +1,8 @@
+#! /bin/bash
+git clone https://github.com/CasparCG/server.git server_src
+cd server_src
+sudo tools/linux/build-in-docker
+sudo tools/linux/extract-from-docker
+chown -r $USER:$USER casparcg_server/
+mv casparcg_server/ ../server
+cd ..

@@ -1,0 +1,59 @@
+sudo apt install cmake build-essential git pkg-config
+mkdir ~/casparCG
+cd ~/casparCG
+
+server install:
+    git clone https://github.com/CasparCG/server.git server_src
+    cd server_src
+    sudo tools/linux/build-in-docker
+    sudo tools/linux/extract-from-docker
+    chown -r $USER:$USER casparcg_server/
+    mv casparcg_server/ ../server
+    cd ..
+
+client install
+    git clone --recurse-submodules https://github.com/CasparCG/client.git client_src
+    cd client_src
+    sudo apt install qt6-base-dev qt6-multimedia-dev qt6-base-dev-tools libvlc-dev libboost-all-dev qt6-tools-dev qt6-websockets-dev qt6-svg-dev qt6-tools-dev-tools libxkbcommon-dev qt6-5compat-dev libvlccore-dev time
+    ./tools/build-linux.sh
+    mv build/ ../client
+    cd ..
+
+
+media-scanner install
+    git clone https://github.com/CasparCG/media-scanner.git media-scanner_src
+    cd media-scanner_src/
+    sudo apt-get install yarnpkg
+    yarnpkg install
+    yarnpkg dev &
+    yarnpkg build
+    mv deploy/ ../scanner
+    cd ..
+
+cleanup:
+    rm -rf client_src
+    rm -rf media-scanner_src
+    rm -rf server_src
+
+setup:
+    mv server/casparcg.config .
+    ln -sf casparcg.config server/casparcg.config
+    ln -sf casparcg.config scanner/casparcg.config
+    sed -i "s#<media-path>media/</media-path>#<media-path>${PWD}/media/</media-path>#g" casparcg.config
+    sed -i "s#<log-path>log/</log-path>#<log-path>${PWD}/log/</log-path>#g" casparcg.config
+    sed -i "s#<log-path disable=\"false\">log/</log-path>#<log-path disable=\"false\">${PWD}/log/</log-path>#g" casparcg.config
+    sed -i "s#<data-path>data</data-path>#<data-path>${PWD}/data</data-path>#g" casparcg.config
+    sed -i "s#<template-path>template</template-path>#<template-path>${PWD}/template</template-path>#g" casparcg.config
+
+
+
+start scanner:
+    ./scanner/casparcg-scanner-v1.4.0-linux-x64
+
+start server:
+    cd server
+    ./run.sh
+    cd ..
+
+start client:
+    ./client/Shell/casparcg-client
