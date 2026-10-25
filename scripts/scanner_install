@@ -1,13 +1,20 @@
 #! /bin/bash
 
-if [ ! -d "media-scanner_src" ]; then
-  git clone https://github.com/CasparCG/media-scanner.git media-scanner_src
+GIT_LINK="https://github.com/CasparCG/media-scanner.git"
+SRC_DIR="media-scanner_src"
+YARN_VERSION="4"
+BUILD_TARGET_DIR="deploy"
+FINISH_DIR="scanner"
+DEBIAN_YARN_SOURCE_LINK="https://deb.nodesource.com/setup_24.x"
+
+if [ ! -d "$SRC_DIR" ]; then
+  git clone "$GIT_LINK" "$SRC_DIR"
 fi
 
-cd media-scanner_src/
+cd "$SRC_DIR"
 
 yarnpkgInstallSecond() {
-  curl -fsSL https://deb.nodesource.com/setup_24.x | sudo -E bash -
+  curl -fsSL "$DEBIAN_YARN_SOURCE_LINK" | sudo -E bash -
   sudo apt-get install -y nodejs
   sudo npm install -g corepack
   sudo corepack enable
@@ -22,8 +29,8 @@ YARN_GOOD=0
 if ! command -v yarnpkg >/dev/null 2>&1; then
   echo "Yarnpkg is not installed"
 else
-  if yarnpkg --version | grep -q "^[4]"; then
-    echo "Yarnpkg version 4 is installed"
+  if yarnpkg --version | grep -q "^[${YARN_VERSION}]"; then
+    echo "Yarnpkg version $YARN_VERSION is installed"
     YARN_GOOD=1
   else
     echo "Yarnpkg too old"
@@ -33,17 +40,17 @@ fi
 
 if [ "$YARN_GOOD" -eq 0 ]; then
   echo "Attempting to install Yarnpkg"
-  if ! apt-cache madison yarnpkg | grep -q "yarnpkg | 4"; then
-    echo "apt yarnpkg not version 4"
-    echo "Installing Yarnpkg version 4 using alternative method"
+  if ! apt-cache madison yarnpkg | grep -q "yarnpkg | $YARN_VERSION"; then
+    echo "apt yarnpkg not version $YARN_VERSION"
+    echo "Installing Yarnpkg version $YARN_VERSION using alternative method"
     yarnpkgInstallSecond
-    if yarnpkg --version | grep -q "^[4]"; then
-      echo "Yarnpkg version 4 is installed"
+    if yarnpkg --version | grep -q "^[${YARN_VERSION}]"; then
+      echo "Yarnpkg version $YARN_VERSION is installed"
       YARN_GOOD=1
     fi
   fi
 else
-  echo "Yarnpkg version 4 is already installed"
+  echo "Yarnpkg version $YARN_VERSION is already installed"
   echo "Skipping installation" 
 fi
 
@@ -54,7 +61,7 @@ if [ "$YARN_GOOD" -eq 0 ]; then
     exit 1
   fi
 else
-  echo "Yarnpkg version 4 is installed"
+  echo "Yarnpkg version $YARN_VERSION is installed"
   echo "not attempting yarnpkg with apt"
 fi
 
@@ -63,26 +70,31 @@ if ! sudo apt upgrade -y; then
   exit 1
 fi
 
+echo "Installing build dependencies"
 yarnpkg install
+echo "starting development server"
 yarnpkg dev &
+echo "building the project"
 yarnpkg build
+echo "build complete, ignore missing './src/index.ts' it is expected"
 
-if [ ! -d "deploy" ]; then
-  echo "Deploy directory not found"
+if [ ! -d "$BUILD_TARGET_DIR" ]; then
+  echo "build did not produce expected $BUILD_TARGET_DIR directory"
+  echo "target directory may have changed name, if so update the script accordingly"
   exit 1
 fi
 
-if [ -d "../scanner" ]; then
+if [ -d "../$FINISH_DIR" ]; then
   echo "Scanner directory already exists"
   echo "do you wish to delete it first? (y/n)"
   read -r response
   if [ "$response" = "y" ]; then
-    rm -rf ../scanner
+    rm -rf ../"$FINISH_DIR"
   else
     echo "Aborting"
     exit 1
   fi
 fi
 
-mv deploy/ ../scanner
+mv "$BUILD_TARGET_DIR"/ ../"$FINISH_DIR"
 cd ..
