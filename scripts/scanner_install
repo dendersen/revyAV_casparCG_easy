@@ -28,7 +28,10 @@ else
 fi
 
 if [ "$YARN_GOOD" -eq 0 ]; then
-  if ! apt apt-cache madison yarnpkg | grep -q "yarnpkg | 4"; then
+  echo "Attempting to install Yarnpkg"
+  if ! apt-cache madison yarnpkg | grep -q "yarnpkg | 4"; then
+    echo "apt yarnpkg not version 4"
+    echo "Installing Yarnpkg version 4 using alternative method"
     yarnpkgInstallSecond
     if yarnpkg --version | grep -q "^[4]"; then
       echo "Yarnpkg version 4 is installed"
@@ -37,15 +40,18 @@ if [ "$YARN_GOOD" -eq 0 ]; then
   fi
 else
   echo "Yarnpkg version 4 is already installed"
+  echo "Skipping installation" 
 fi
 
 if [ "$YARN_GOOD" -eq 0 ]; then
+  echo "installing Yarnpkg using apt"
   if ! sudo apt install -y yarnpkg; then
-    echo "Failed to install yarnpkg on apt"
+    echo "Failed to install yarnpkg using apt"
     exit 1
   fi
 else
-  echo "Yarnpkg version 4 is already installed"
+  echo "Yarnpkg version 4 is installed"
+  echo "not attempting yarnpkg with apt"
 fi
 
 if ! sudo apt upgrade -y; then
