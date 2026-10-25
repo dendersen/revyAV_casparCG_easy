@@ -1,4 +1,4 @@
-
+#! /bin/bash
 if [ "$PWD" != "$HOME/casparCG" ]; then
   OLD_PATH="$PWD"
   REPO=$(cat ./.git/config | grep 'url = ' | sed 's|url = ||' | sed 's| ||' | sed 's|\t||')
