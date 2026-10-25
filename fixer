@@ -5,10 +5,17 @@ if [ "$PWD" != "$HOME/casparCG" ]; then
   #insure repo points to a revyAV_casparCG_easy.git
   if [[ "$REPO" != *"revyAV_casparCG_easy.git"* ]]; then
     echo "Error: Repository is not revyAV_casparCG_easy.git"
-    exit 1
+    exit 2
   fi
+  echo "got path    '$REPO'"
+  echo "expecting : 'https://github.com/dendersen/revyAV_casparCG_easy.git'"
   if [ "$REPO" != "" ]; then
-    git clone "$REPO" "$HOME/casparCG"
+    if git clone "$REPO" "$HOME/casparCG"; then
+      echo "Repository cloned successfully."
+    else
+      echo "Error: Failed to clone repository."
+      exit 1
+    fi
   fi
   cd "$HOME/casparCG"
   #ask user for confirmation before removing old path
