@@ -1,5 +1,12 @@
 #! /bin/bash
-mv server/casparcg.config .
+if ! [ -f casparcg.config ]; then
+  if [ -f server/casparcg.config ]; then
+    mv server/casparcg.config .
+  else
+    echo "casparcg.config not found, please make sure it exists in the server directory."
+    exit 1
+  fi
+fi
 ln -sf ../casparcg.config server/casparcg.config
 ln -sf ../casparcg.config scanner/casparcg.config
 sed -i "s#<media-path>media/</media-path>#<media-path>${PWD}/media/</media-path>#g" casparcg.config
