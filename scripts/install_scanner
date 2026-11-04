@@ -96,5 +96,8 @@ if [ -d "../$FINISH_DIR" ]; then
   fi
 fi
 
+echo "install ffmpeg"
+sudo apt install ffmpeg
+
 mv "$BUILD_TARGET_DIR"/ ../"$FINISH_DIR"
 cd ..
