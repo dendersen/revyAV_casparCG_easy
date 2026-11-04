@@ -7,3 +7,4 @@ data/
 template/
 _media/
 casparcg.config
+__pycache__/
