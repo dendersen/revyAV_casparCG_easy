@@ -6,5 +6,6 @@ log/
 data/
 template/
 _media/
+rundowns/
 casparcg.config
 __pycache__/
